@@ -1,0 +1,98 @@
+# LuaSwift
+
+A Swift package that provides seamless integration with Lua 5.4.8, offering three distinct layers of API access to suit different use cases.
+
+## Overview
+
+LuaSwift is a Swift package that embeds the complete Lua 5.4.8 interpreter and provides multiple levels of API access:
+
+- **CLua**: Direct access to the native Lua 5.4.8 C API
+- **Lua**: Swift-friendly wrapper around the C API which avoids changing the original C API
+- **LuaHelpers**: High-level Swift helpers for easy Lua integration
+- **LuaSwift**: A convenience import which simply imports both Lua and LuaHelpers together
+
+## Features
+
+- ✅ Complete Lua 5.4.8 implementation
+- ✅ C API provided in Swift
+- ✅ Type-safe API with Swift enums and structs
+- ✅ Coroutine support
+- ✅ All standard Lua libraries included
+- ✅ Cross-platform support (iOS, macOS, watchOS, tvOS, Linux, WASM)
+
+## Installation
+
+### Swift Package Manager
+
+Add LuaSwift to your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/joehinkle11/LuaSwift.git", from: "1.0.0")
+]
+```
+
+Then add it to your target dependencies:
+
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: ["LuaSwift"]
+)
+```
+
+## API Layers
+
+### CLua Target
+
+The `CLua` target provides direct access to the Lua 5.4.8 C API.
+
+```swift
+import CLua
+
+let L = luaL_newstate()
+luaL_openlibs(L)
+
+// Direct C API usage
+lua_pushstring(L, "Hello from C API")
+lua_setglobal(L, "message")
+
+lua_close(L)
+```
+
+### Lua Target
+
+The `Lua` target provides a Swift-friendly wrapper around the C API by simply putting most of lua's functions into methods on a struct called `LuaState`. `LuaState` only has one member property which points to the c object lua_State.
+
+```swift
+// example todo
+```
+
+## Platform Support
+
+LuaSwift supports all platforms that Swift supports:
+- macOS
+- iOS
+- watchOS
+- tvOS
+- Linux
+- Windows
+- WASM
+
+## Thread Safety
+
+Lua states are not thread-safe. Each `LuaState` instance should only be used from a single thread. If you need to use Lua from multiple threads, create separate `LuaState` instances for each thread.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
+
+## License
+
+This package includes Lua 5.4.8, which is licensed under the MIT License. See the Lua source files for details.
+
+## Credits
+
+- Lua 5.4.8 by the Lua Team (PUC-Rio)
+
+
