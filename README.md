@@ -1,6 +1,6 @@
 # LuaSwift
 
-A Swift package that provides seamless integration with Lua 5.4.8, offering three distinct layers of API access to suit different use cases.
+A Swift package that provides integration with Lua 5.4.8.
 
 ## Overview
 
@@ -46,6 +46,8 @@ Then add it to your target dependencies:
 ### CLua Target
 
 The `CLua` target provides direct access to the Lua 5.4.8 C API.
+
+Some small modifications to the C code were necessary to get Lua compiling in SPM. These changes are listed [here](Sources/lua-5.4.8/README).
 
 ```swift
 import CLua
@@ -106,10 +108,6 @@ LuaSwift supports all platforms that Swift supports:
 - Windows
 - WASM
 
-## Thread Safety
-
-Lua states are not thread-safe. Each `LuaState` instance should only be used from a single thread. If you need to use Lua from multiple threads, create separate `LuaState` instances for each thread.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
@@ -117,6 +115,8 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ## License
 
 This package includes Lua 5.4.8, which is licensed under the MIT License. See the Lua source files for details.
+
+The Swift package itself is under the MIT License as well.
 
 ## Credits
 
