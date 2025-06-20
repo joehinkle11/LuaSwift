@@ -2,6 +2,6 @@
 This is Lua 5.4.8, released on 21 May 2025.
 
 Modifications made to support installation inside a Swift package:
- - all headers moded into ./include except for ljumptab.h
+ - all headers moved into ./include except for ljumptab.h
  - main function removed
- - extra wrapper functions provided in swiftsupport.c and swiftsupport.h
+ - extra wrapper functions provided in swiftsupport.c and swiftsupport.h. This is mainly to fix how Swift doesn't import varadic functions or some macros
