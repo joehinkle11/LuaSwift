@@ -64,9 +64,28 @@ lua_close(L)
 
 The `Lua` target provides a Swift-friendly wrapper around the C API by simply putting most of lua's functions into methods on a struct called `LuaState`. `LuaState` only has one member property which points to the c object lua_State.
 
+One of the unit tests looks like this.
+
 ```swift
-// example todo
+let L = LuaState.newLuaState()
+L.openLibs()
+#expect(L.getTop() == 0) // ✅
+#expect(L.type(-1) == .LUA_TNIL) // ✅
+var status = L.loadBufferX(buffer: #"return "asdf""#, name: "hello")
+#expect(status == .LUA_OK) // ✅
+#expect(L.getTop() == 1) // ✅
+#expect(L.type(-1) == .LUA_TFUNCTION) // ✅
+status = L.pcall(nargs: 0)
+#expect(status == .LUA_OK) // ✅
+#expect(L.getTop() == 1) // ✅
+#expect(L.type(-1) == .LUA_TSTRING) // ✅
+#expect(L.toString(-1) == "asdf") // ✅
+L.pop(1)
+#expect(L.getTop() == 0) // ✅
+L.close()
 ```
+
+The idea of the `Lua` target in this package is to just expose as much of the C API of Lua but as methods on the `LuaState` type (which is simply a struct with a reference to the underlying C lua_State object).
 
 ## Platform Support
 
