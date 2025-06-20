@@ -87,6 +87,14 @@ L.close()
 
 The idea of the `Lua` target in this package is to just expose as much of the C API of Lua but as methods on the `LuaState` type (which is simply a struct with a reference to the underlying C lua_State object).
 
+### LuaHelpers Target
+
+Todo. Adds additional extensions to the `LuaState` type and helpers for interop with Swift/Lua.
+
+### LuaSwift Target
+
+This is the one you should be importing. This target simply imports both the `Lua` and `LuaHelpers` targets.
+
 ## Platform Support
 
 LuaSwift supports all platforms that Swift supports:
