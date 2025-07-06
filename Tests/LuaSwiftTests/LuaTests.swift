@@ -98,3 +98,49 @@ import Lua
     #expect(LUA_EXTRASPACE == MemoryLayout<UnsafeRawPointer>.size)
     L.close()
 }
+
+
+
+@Test func simpleUserData() throws {
+    let L = LuaState.newLuaState()
+    let userData = L.newUserData(size: 1)
+    #expect(userData.assumingMemoryBound(to: UInt8.self).pointee == 0)
+    userData.assumingMemoryBound(to: UInt8.self).pointee = 5
+    let userData2 = try #require(L.toUserData())
+    #expect(userData2.assumingMemoryBound(to: UInt8.self).pointee == 5)
+    userData.assumingMemoryBound(to: UInt8.self).pointee = 15
+    #expect(userData2.assumingMemoryBound(to: UInt8.self).pointee == 15)
+    #expect(userData.assumingMemoryBound(to: UInt8.self).pointee == 15)
+    L.close()
+}
+
+
+
+@Test func simpleLuaCFunc() throws {
+    let L = LuaState.newLuaState()
+    L.openLibs()
+    #expect(L.getTop() == 0)
+    #expect(L.type(-1) == .LUA_TNIL)
+    L.pushLuaCFunction { statePt in
+        let state = LuaState(state: statePt)
+        state.pushString("asdf")
+        return 1
+    }
+    #expect(L.getTop() == 1)
+    #expect(L.type(-1) == .LUA_TFUNCTION)
+    L.setGlobal("myFunc")
+    #expect(L.getTop() == 0)
+    #expect(L.type(-1) == .LUA_TNIL)
+    var status = L.loadBufferX(buffer: #"return myFunc()"#, name: "hello")
+    #expect(status == .LUA_OK)
+    #expect(L.getTop() == 1)
+    #expect(L.type(-1) == .LUA_TFUNCTION)
+    status = L.pcall(nargs: 0)
+    #expect(status == .LUA_OK)
+    #expect(L.getTop() == 1)
+    #expect(L.type(-1) == .LUA_TSTRING)
+    #expect(L.toString(-1) == "asdf")
+    L.pop(1)
+    #expect(L.getTop() == 0)
+    L.close()
+}
