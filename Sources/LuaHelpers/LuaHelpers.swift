@@ -1,6 +1,7 @@
 
 import CLua
 import Lua
+import Foundation
 
 extension LuaState {
     
@@ -151,5 +152,24 @@ extension LuaState {
     public func setField(_ idx: Int32, key: String, cFunction f: @convention(thin) (LuaState) -> Int32) {
         self.pushCFunction(f)
         self.setField(idx, key: key)
+    }
+    
+    
+    @inlinable
+    @inline(__always)
+    public func newLib(functionRegistration: [LuaFunctionRegistration]) {
+        self.newLib(reg: functionRegistration.map {
+            luaL_Reg(name: strdup($0.name), func: unsafeBitCast($0.cFunction, to: lua_CFunction.self))
+        } + [.init(name: nil, func: nil)])
+    }
+}
+
+public struct LuaFunctionRegistration {
+    public let name: String
+    public let cFunction: @convention(thin) (LuaState) -> Int32
+    
+    public init(name: String, cFunction: @escaping @convention(thin) (LuaState) -> Int32) {
+        self.name = name
+        self.cFunction = cFunction
     }
 }

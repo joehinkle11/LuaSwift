@@ -213,3 +213,34 @@ import LuaHelpers
     #expect(L.getTop() == 0)
     L.close()
 }
+
+@Test func testNativeModule2() async throws {
+    let L = LuaState.newLuaState()
+    
+    L.openLibs()
+    
+    L.getGlobal("package")
+    L.getField(-1, key: "preload")
+    
+    L.pushCFunction { L in
+        L.newLib(functionRegistration: [
+            LuaFunctionRegistration(
+                name: "hello",
+                cFunction: { L in
+                    L.pushString("world")
+                    return 1
+                }
+            )
+        ])
+        return 1
+    }
+    L.setField(-2, key: "mymodule")
+    L.pop(2)
+
+    // You can now use `require("mymodule")` in Lua scripts
+    L.doString("local m = require('mymodule'); return m.hello()")
+    
+    #expect(L.toString() == "world")
+    
+    L.close()
+}

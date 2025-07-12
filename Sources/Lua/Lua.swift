@@ -266,7 +266,7 @@ public struct LuaState {
     @inlinable
     @inline(__always)
     public func newTable() {
-        lua_createtable(state, 0, 0)
+        createTable(narr: 0, nrec: 0)
     }
 
     /// Generates a Lua error, using the value at the top of the stack as the error object. This function does a long jump, and therefore never returns (see luaL_error).
@@ -303,6 +303,7 @@ public struct LuaState {
     /// Returns the type of the pushed value.
     @inlinable
     @inline(__always)
+    @discardableResult
     public func getField(_ idx: Int32, key: String) -> LuaType {
         return LuaType(rawValue: lua_getfield(state, idx, key))
     }
@@ -320,6 +321,7 @@ public struct LuaState {
     /// Returns the type of that value.
     @inlinable
     @inline(__always)
+    @discardableResult
     public func getGlobal(_ name: String) -> LuaType {
         return LuaType(rawValue: lua_getglobal(state, name))
     }
@@ -328,6 +330,7 @@ public struct LuaState {
     /// Returns the type of the pushed value.
     @inlinable
     @inline(__always)
+    @discardableResult
     public func getI(_ idx: Int32, i: Int64) -> LuaType {
         return LuaType(rawValue: lua_geti(state, idx, i))
     }
@@ -494,6 +497,39 @@ public struct LuaState {
     public func checkLString(_ arg: Int32, l: UnsafeMutablePointer<size_t>?) -> String {
         return String(cString: luaL_checklstring(state, arg, l))
     }
+    
+    /// void luaL_newlib (lua_State *L, const luaL_Reg l[]);
+    /// Creates a new table and registers there the functions in list l.
+    /// It is implemented as the following macro:
+    /// (luaL_newlibtable(L,l), luaL_setfuncs(L,l,0))
+    /// The array l must be the actual array, not a pointer to it.
+    @inlinable
+    @inline(__always)
+    public func newLib(reg l: [luaL_Reg]) {
+        assert(l.last != nil && l.last?.name == nil && l.last?.func == nil, "You must pass a sentinel at the end of the array i.e. pass luaL_Reg(name: nil, func: nil)")
+        luaL_newlib_nonmacro(state, l)
+    }
+
+    /* TODO:
+    /// Creates a new table with a size optimized to store all entries in the array l (but does not actually store them). It is intended to be used in conjunction with luaL_setfuncs (see luaL_newlib).
+    /// It is implemented as a macro. The array l must be the actual array, not a pointer to it.
+    @inlinable
+    @inline(__always)
+    public func newLibTable(_ l: [luaL_Reg]) {
+        luaL_newlibtable_nonmacro(state, l)
+    }
+    */
+    
+    /// int luaL_dostring (lua_State *L, const char *str);
+    /// Loads and runs the given string. It is defined as the following macro:
+    /// (luaL_loadstring(L, str) || lua_pcall(L, 0, LUA_MULTRET, 0))
+    /// It returns false if there are no errors or true in case of errors.
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func doString(_ str: String) -> Bool {
+        return luaL_dostring_nonmacro(state, str) == 1
+    }
 }
 
 @inline(__always)
@@ -524,7 +560,7 @@ public struct LuaType: RawRepresentable, Sendable, Equatable {
 }
 
 
-public struct LuaThreadStatus: RawRepresentable, Sendable {
+public struct LuaThreadStatus: RawRepresentable, Sendable, Equatable {
     @inline(__always)
     public let rawValue: Int32
     

@@ -1,6 +1,8 @@
 #ifndef swiftsupport_h
 #define swiftsupport_h
 
+#include "lauxlib.h"
+
 /*
 ** Garbage-collection function, non varadic
 */
@@ -21,6 +23,11 @@ LUA_API void* lua_getextraspace_function(lua_State *L);
 */
 LUA_API size_t LUA_EXTRASPACE_SIZE();
 
+LUA_API void luaL_newlib_nonmacro (lua_State *L, const luaL_Reg l[]);
+
+LUA_API void (luaL_newlibtable_nonmacro) (lua_State *L, const luaL_Reg l[]);
+
+LUA_API int luaL_dostring_nonmacro (lua_State *L, const char *str);
 
 #endif
 

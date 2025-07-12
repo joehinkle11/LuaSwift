@@ -34,7 +34,7 @@ let package = Package(
             name: "CLua",
             path: "Sources/lua-5.4.8/src",
             cxxSettings: [
-                .define("NO_STDLIB_SYSTEM", .when(platforms: [.iOS, .android, .watchOS, .wasi, .visionOS, .macCatalyst, .tvOS, .driverKit])),
+                .define("LUA_USE_IOS", .when(platforms: [.iOS])),
             ]
         ),
         .testTarget(

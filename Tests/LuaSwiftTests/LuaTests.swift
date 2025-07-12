@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 import Lua
 
 @Test func simpleReturnInCoroutine() {
@@ -142,5 +143,38 @@ import Lua
     #expect(L.toString(-1) == "asdf")
     L.pop(1)
     #expect(L.getTop() == 0)
+    L.close()
+}
+
+@Test func testNativeModule() async throws {
+    let L = LuaState.newLuaState()
+    
+    L.openLibs()
+    
+    L.getGlobal("package")
+    L.getField(-1, key: "preload")
+    
+    L.pushCFunction { L in
+        L.newLib(reg: [
+            .init(
+                name: strdup("hello"),
+                func: { L in
+                    let L = LuaState(state: L)
+                    L.pushString("world")
+                    return 1
+                }
+            ),
+            .init(name: nil, func: nil)
+        ])
+        return 1
+    }
+    L.setField(-2, key: "mymodule")
+    L.pop(2)
+
+    // You can now use `require("mymodule")` in Lua scripts
+    L.doString("local m = require('mymodule'); return m.hello()")
+    
+    #expect(L.toString() == "world")
+    
     L.close()
 }

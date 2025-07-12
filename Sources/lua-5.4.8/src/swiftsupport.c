@@ -30,3 +30,15 @@ LUA_API void* lua_getextraspace_function(lua_State *L) {
 LUA_API size_t LUA_EXTRASPACE_SIZE() {
     return LUA_EXTRASPACE;
 }
+
+LUA_API void luaL_newlib_nonmacro (lua_State *L, const luaL_Reg l[]) {
+    luaL_newlib(L, l);
+}
+
+LUA_API void (luaL_newlibtable_nonmacro) (lua_State *L, const luaL_Reg l[]) {
+    return lua_createtable(L, 0, sizeof(l)/sizeof((l)[0]) - 1);
+}
+
+LUA_API int luaL_dostring_nonmacro (lua_State *L, const char *str) {
+    luaL_dostring(L, str);
+}
