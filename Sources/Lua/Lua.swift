@@ -531,6 +531,16 @@ public struct LuaState {
     public func doString(_ str: String) -> Bool {
         return luaL_dostring_nonmacro(state, str) == 1
     }
+
+    /// Gets information about the n-th upvalue of the closure at index funcindex. It pushes the upvalue's value onto the stack and returns its name. Returns NULL (and pushes nothing) when the index n is greater than the number of upvalues.
+    /// For C functions, this function uses the empty string "" as a name for all upvalues. (For Lua functions, upvalues are the external local variables that the function uses, and that are consequently included in its closure.)
+    /// Upvalues have no particular order, as they are active through the whole function. They are numbered in an arbitrary order.
+    @inlinable
+    @inline(__always)
+    public func getUpvalue(_ funcindex: Int32, _ n: Int32) -> String? {
+        guard let result = lua_getupvalue(state, funcindex, n) else { return nil }
+        return String(cString: result)
+    }
     
     /// Sets the value of a closure's upvalue. It assigns the value at the top of the stack to the upvalue and returns its name. It also pops the value from the stack.
     /// Returns NULL (and pops nothing) when the index n is greater than the number of upvalues.
@@ -539,7 +549,8 @@ public struct LuaState {
     @inline(__always)
     @discardableResult
     public func setupValue(_ funcindex: Int32, _ n: Int32) -> String? {
-        return String(cString: lua_setupvalue(state, funcindex, n))
+        guard let result = lua_setupvalue(state, funcindex, n) else { return nil }
+        return String(cString: result)
     }
 
     /// Gets information about the interpreter runtime stack.
@@ -585,54 +596,38 @@ public struct LuaState {
     public func checkUserData(_ arg: Int32 = 1, tname: String) -> UnsafeMutableRawPointer {
         return luaL_checkudata(state, arg, tname)
     }
-}
 
-@inline(__always)
-public let LUA_REGISTRYINDEX: Int32 = -LUAI_MAXSTACK - 1000
+    /// Yields a coroutine (thread).
+    /// When a C function calls lua_yieldk, the running coroutine suspends its execution, and the call to lua_resume that started this coroutine returns. The parameter nresults is the number of values from the stack that will be passed as results to lua_resume.
+    /// When the coroutine is resumed again, Lua calls the given continuation function k to continue the execution of the C function that yielded (see §4.7). This continuation function receives the same stack from the previous function, with the n results removed and replaced by the arguments passed to lua_resume. Moreover, the continuation function receives the value ctx that was passed to lua_yieldk.
 
-public struct LuaType: RawRepresentable, Sendable, Equatable {
-    
+    /// Usually, this function does not return; when the coroutine eventually resumes, it continues executing the continuation function. However, there is one special case, which is when this function is called from inside a line or a count hook (see §4.9) (see `yieldkInsideHook`). In that case, lua_yieldk should be called with no continuation (probably in the form of lua_yield) and no results, and the hook should return immediately after the call. Lua will yield and, when the coroutine resumes again, it will continue the normal execution of the (Lua) function that triggered the hook.
+
+    /// This function can raise an error if it is called from a thread with a pending C call with no continuation function, or it is called from a thread that is not running inside a resume (e.g., the main thread).
+    @inlinable
     @inline(__always)
-    public let rawValue: Int32
+    public func luaYieldk(nresults: Int32, ctx: lua_KContext = 0, k: lua_KFunction?) -> Never {
+        lua_yieldk(state, nresults, ctx, k)
+        preconditionFailure()
+    }
     
     @inlinable
     @inline(__always)
-    public init(rawValue: Int32) {
-        self.rawValue = rawValue
+    @discardableResult
+    public func luaYieldkInsideHook(nresults: Int32, ctx: lua_KContext = 0, k: lua_KFunction?) -> Int32 {
+        return lua_yieldk(state, nresults, ctx, k)
     }
-
-    @inline(__always) public static let LUA_TNONE = LuaType(rawValue: CLua.LUA_TNONE)
-    @inline(__always) public static let LUA_TNIL = LuaType(rawValue: CLua.LUA_TNIL)
-    @inline(__always) public static let LUA_TBOOLEAN = LuaType(rawValue: CLua.LUA_TBOOLEAN)
-    @inline(__always) public static let LUA_TLIGHTUSERDATA = LuaType(rawValue: CLua.LUA_TLIGHTUSERDATA)
-    @inline(__always) public static let LUA_TNUMBER = LuaType(rawValue: CLua.LUA_TNUMBER)
-    @inline(__always) public static let LUA_TSTRING = LuaType(rawValue: CLua.LUA_TSTRING)
-    @inline(__always) public static let LUA_TTABLE = LuaType(rawValue: CLua.LUA_TTABLE)
-    @inline(__always) public static let LUA_TFUNCTION = LuaType(rawValue: CLua.LUA_TFUNCTION)
-    @inline(__always) public static let LUA_TUSERDATA = LuaType(rawValue: CLua.LUA_TUSERDATA)
-    @inline(__always) public static let LUA_TTHREAD = LuaType(rawValue: CLua.LUA_TTHREAD)
-    @inline(__always) public static let LUA_NUMTYPES = LuaType(rawValue: CLua.LUA_NUMTYPES)
-}
-
-
-public struct LuaThreadStatus: RawRepresentable, Sendable, Equatable {
-    @inline(__always)
-    public let rawValue: Int32
     
     @inlinable
     @inline(__always)
-    public init(rawValue: Int32) {
-        self.rawValue = rawValue
+    public func yield(nresults: Int32) -> Never {
+        luaYieldk(nresults: nresults, ctx: 0, k: nil)
     }
     
-    @inline(__always) public static let LUA_OK = LuaThreadStatus(rawValue: CLua.LUA_OK)
-    @inline(__always) public static let LUA_YIELD = LuaThreadStatus(rawValue: CLua.LUA_YIELD)
-    @inline(__always) public static let LUA_ERRRUN = LuaThreadStatus(rawValue: CLua.LUA_ERRRUN)
-    @inline(__always) public static let LUA_ERRSYNTAX = LuaThreadStatus(rawValue: CLua.LUA_ERRSYNTAX)
-    @inline(__always) public static let LUA_ERRMEM = LuaThreadStatus(rawValue: CLua.LUA_ERRMEM)
-    @inline(__always) public static let LUA_ERRERR = LuaThreadStatus(rawValue: CLua.LUA_ERRERR)
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func yieldInsideHook(nresults: Int32) -> Int32 {
+        return luaYieldkInsideHook(nresults: nresults, ctx: 0, k: nil)
+    }
 }
-
-
-@inline(__always)
-public let LUA_EXTRASPACE: Int = LUA_EXTRASPACE_SIZE()

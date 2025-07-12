@@ -150,6 +150,19 @@ extension LuaState {
     
     @inlinable
     @inline(__always)
+    public func yieldk(nresults: Int32, ctx: lua_KContext = 0, k: @convention(thin) (LuaState, LuaThreadStatus, lua_KContext) -> Int32) -> Never {
+        luaYieldk(nresults: nresults, ctx: ctx, k: unsafeBitCast(k, to: lua_KFunction.self))
+    }
+    
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func yieldkInsideHook(nresults: Int32, ctx: lua_KContext = 0, k: @convention(thin) (LuaState, LuaThreadStatus, lua_KContext) -> Int32) -> Int32 {
+        return luaYieldkInsideHook(nresults: nresults, ctx: ctx, k: unsafeBitCast(k, to: lua_KFunction.self))
+    }
+    
+    @inlinable
+    @inline(__always)
     public func setField(_ idx: Int32, key: String, cFunction f: @convention(thin) (LuaState) -> Int32) {
         self.pushCFunction(f)
         self.setField(idx, key: key)

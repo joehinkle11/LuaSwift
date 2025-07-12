@@ -33,7 +33,75 @@ import Lua
 @Test func simpleSuspendCoroutine() {
     let L = LuaState.newLuaState()
     L.openLibs()
-    
+    #expect(L.getTop() == 0)
+    L.pushCFunction { L in
+        L.pushString("hello")
+        L.yield(nresults: 1)
+    }
+    L.setGlobal("c_func")
+    let co = L.newThread()
+    #expect(L.getTop() == 1)
+    let status = co.loadBufferX(buffer: #"c_func()"#, name: "hello")
+    #expect(status == .LUA_OK)
+    #expect(L.getTop() == 1)
+    var nresults: Int32 = 0
+    let result = co.resume(nargs: 0, nresults: &nresults)
+    #expect(co.getTop() == 1)
+    #expect(L.getTop() == 1)
+    #expect(result == .LUA_YIELD)
+    #expect(nresults == 1)
+    #expect(co.toString() == "hello")
+    co.pop(1)
+    #expect(L.getTop() == 1)
+    #expect(co.getTop() == 0)
+    L.close()
+}
+
+@Test func simpleSuspendCoroutine2() {
+    let L = LuaState.newLuaState()
+    L.openLibs()
+    #expect(L.getTop() == 0)
+    L.pushCFunction { L in
+        L.pushString("first")
+        L.yieldk(nresults: 1) { L, status, ctx in
+            #expect(status == .LUA_YIELD)
+            L.pushString("second")
+            L.yield(nresults: 1)
+        }
+    }
+    L.setGlobal("c_func")
+    let co = L.newThread()
+    #expect(L.getTop() == 1)
+    let status = co.loadBufferX(buffer: #"c_func()"#, name: "hello")
+    #expect(status == .LUA_OK)
+    #expect(L.getTop() == 1)
+    var nresults: Int32 = 0
+    var result = co.resume(nargs: 0, nresults: &nresults)
+    #expect(co.getTop() == 1)
+    #expect(L.getTop() == 1)
+    #expect(result == .LUA_YIELD)
+    #expect(nresults == 1)
+    #expect(co.toString() == "first")
+    co.pop(1)
+    #expect(L.getTop() == 1)
+    #expect(co.getTop() == 0)
+    result = co.resume(nargs: 0, nresults: &nresults)
+    #expect(co.getTop() == 1)
+    #expect(L.getTop() == 1)
+    #expect(result == .LUA_YIELD)
+    #expect(nresults == 1)
+    #expect(co.toString() == "second")
+    co.pop(1)
+    #expect(L.getTop() == 1)
+    #expect(co.getTop() == 0)
+    result = co.resume(nargs: 0, nresults: &nresults)
+    #expect(co.getTop() == 0)
+    #expect(L.getTop() == 1)
+    #expect(result == .LUA_OK)
+    #expect(nresults == 0)
+    #expect(L.getTop() == 1)
+    #expect(co.getTop() == 0)
+    L.close()
 }
 
 @Test func simpleNoCall() {

@@ -118,12 +118,11 @@ extension SwiftStructUserdata {
 
 
 extension LuaState {
-    
     @inlinable
     @inline(__always)
     public func new<T: SwiftStructUserdata>(_ instance: consuming T) -> UnsafeMutablePointer<T> {
         let wrapperPointer = self.newUserData(
-            size: MemoryLayout<SwiftStructUserdataWrapper<T>>.size  // todo: figure out nuvalue param
+            size: MemoryLayout<SwiftStructUserdataWrapper<T>>.size
         ).initializeMemory(
             as: SwiftStructUserdataWrapper<T>.self,
             to: SwiftStructUserdataWrapper(
