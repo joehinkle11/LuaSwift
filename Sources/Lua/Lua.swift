@@ -272,8 +272,9 @@ public struct LuaState {
     /// Generates a Lua error, using the value at the top of the stack as the error object. This function does a long jump, and therefore never returns (see luaL_error).
     @inlinable
     @inline(__always)
-    public func error() {
+    public func error() -> Never {
         lua_error(state)
+        preconditionFailure()
     }
 
     /// Controls the garbage collector.
@@ -529,6 +530,60 @@ public struct LuaState {
     @discardableResult
     public func doString(_ str: String) -> Bool {
         return luaL_dostring_nonmacro(state, str) == 1
+    }
+    
+    /// Sets the value of a closure's upvalue. It assigns the value at the top of the stack to the upvalue and returns its name. It also pops the value from the stack.
+    /// Returns NULL (and pops nothing) when the index n is greater than the number of upvalues.
+    /// Parameters funcindex and n are as in function lua_getupvalue.
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func setupValue(_ funcindex: Int32, _ n: Int32) -> String? {
+        return String(cString: lua_setupvalue(state, funcindex, n))
+    }
+
+    /// Gets information about the interpreter runtime stack.
+    /// This function fills parts of a lua_Debug structure with an identification of the activation record of the function executing at a given level. Level 0 is the current running function, whereas level n+1 is the function that has called level n (except for tail calls, which do not count on the stack). When there are no errors, lua_getstack returns `true`; when called with a level greater than the stack depth, it returns `false`.
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func getStack(_ level: Int32, ar: UnsafeMutablePointer<lua_Debug>?) -> Bool {
+        return lua_getstack(state, level, ar) != 0
+    }
+
+    /// Gets information about a specific function or function invocation.
+    /// To get information about a function invocation, the parameter ar must be a valid activation record that was filled by a previous call to lua_getstack or given as argument to a hook (see lua_Hook).
+
+    /// To get information about a function, you push it onto the stack and start the what string with the character '>'. (In that case, lua_getinfo pops the function from the top of the stack.) For instance, to know in which line a function f was defined, you can write the following code:
+
+    ///     lua_Debug ar;
+    ///     lua_getglobal(L, "f");  /* get global 'f' */
+    ///     lua_getinfo(L, ">S", &ar);
+    ///     printf("%d\n", ar.linedefined);
+    /// Each character in the string what selects some fields of the structure ar to be filled or a value to be pushed on the stack:
+
+    /// 'n': fills in the field name and namewhat;
+    /// 'S': fills in the fields source, short_src, linedefined, lastlinedefined, and what;
+    /// 'l': fills in the field currentline;
+    /// 't': fills in the field istailcall;
+    /// 'u': fills in the fields nups, nparams, and isvararg;
+    /// 'f': pushes onto the stack the function that is running at the given level;
+    /// 'L': pushes onto the stack a table whose indices are the numbers of the lines that are valid on the function. (A valid line is a line with some associated code, that is, a line where you can put a break point. Non-valid lines include empty lines and comments.)
+    /// If this option is given together with option 'f', its table is pushed after the function.
+
+    /// This function returns `false` on error (for instance, an invalid option in what).
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func getInfo(_ what: String, ar: UnsafeMutablePointer<lua_Debug>?) -> Bool {
+        return lua_getinfo(state, what, ar) != 0
+    }
+
+    /// Checks whether the function argument arg is a userdata of the type tname (see luaL_newmetatable) and returns the userdata address (see lua_touserdata).
+    @inlinable
+    @inline(__always)
+    public func checkUserData(_ arg: Int32 = 1, tname: String) -> UnsafeMutableRawPointer {
+        return luaL_checkudata(state, arg, tname)
     }
 }
 

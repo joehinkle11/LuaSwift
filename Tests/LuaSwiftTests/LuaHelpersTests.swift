@@ -186,6 +186,33 @@ import LuaHelpers
     #expect(C.count == 0)
 }
 
+@Test func simpleSwiftStructUserdataAsUserData5() throws {
+    struct MyStruct: SwiftStructUserdata {
+        var val1: Int
+        init() {
+            self.val1 = 90
+        }
+        func __index(_ L: LuaState) -> Int32 {
+            L.pushString("You accessed: \(L.toString() ?? "")")
+            return 1
+        }
+    }
+    let L = LuaState.newLuaState()
+    let myStruct = L.new(MyStruct())
+    L.setGlobal("myStruct")
+    #expect(myStruct.pointee.val1 == 90)
+    myStruct.pointee.val1 = 5
+    #expect(myStruct.pointee.val1 == 5)
+    var status = L.loadBufferX(buffer: #"return myStruct.test"#, name: "hello")
+    #expect(status == .LUA_OK)
+    status = L.pcall(nargs: 0)
+    #expect(status == .LUA_OK)
+    #expect(L.getTop() == 1)
+    #expect(L.type(-1) == .LUA_TSTRING)
+    #expect(L.toString(-1) == "You accessed: test")
+    L.close()
+}
+
 @Test func simpleCFunc() throws {
     let L = LuaState.newLuaState()
     L.openLibs()

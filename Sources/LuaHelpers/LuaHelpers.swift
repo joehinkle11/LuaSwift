@@ -7,6 +7,7 @@ extension LuaState {
     
     @inlinable
     @inline(__always)
+    @discardableResult
     public func pushRef(_ ref: Int32) -> LuaType {
         self.rawGetI(LUA_REGISTRYINDEX, n: lua_Integer(ref))
     }
@@ -161,6 +162,51 @@ extension LuaState {
         self.newLib(reg: functionRegistration.map {
             luaL_Reg(name: strdup($0.name), func: unsafeBitCast($0.cFunction, to: lua_CFunction.self))
         } + [.init(name: nil, func: nil)])
+    }
+    
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func getStack(_ level: Int32, debug: inout LuaDebug) -> Bool {
+        return lua_getstack(state, level, &debug._lua_Debug) != 0
+    }
+    
+    @inlinable
+    @inline(__always)
+    @discardableResult
+    public func getInfo(_ what: String, debug: inout LuaDebug) -> Bool {
+        return lua_getinfo(state, what, &debug._lua_Debug) != 0
+    }
+}
+
+public struct LuaDebug {
+    public var _lua_Debug: lua_Debug
+    
+    public var event: Int32 { _lua_Debug.event }
+    public var name: String { _lua_Debug.name.map(String.init(cString:)) ?? "" }
+    public var nameWhat: String { _lua_Debug.namewhat.map(String.init(cString:)) ?? "" }
+    public var what: String { _lua_Debug.what.map(String.init(cString:)) ?? "" }
+    public var source: String { _lua_Debug.source.map(String.init(cString:)) ?? "" }
+    public var srcLen: Int { Int(_lua_Debug.srclen) }
+    public var currentLine: Int32 { _lua_Debug.currentline }
+    public var lineDefined: Int32 { _lua_Debug.linedefined }
+    public var lastLineDefined: Int32 { _lua_Debug.lastlinedefined }
+    public var numberOfUpvalues: UInt8 { _lua_Debug.nups }
+    public var numberOfParameters: UInt8 { _lua_Debug.nparams }
+    public var isVararg: Bool { _lua_Debug.isvararg != 0 }
+    public var isTailCall: Bool { _lua_Debug.istailcall != 0 }
+    public var firstTransfer: UInt16 { _lua_Debug.ftransfer }
+    public var numberOfTransfers: UInt16 { _lua_Debug.ntransfer }
+    public var shortSource: String {
+        return withUnsafeBytes(of: _lua_Debug.short_src) { rawBuffer -> String in
+            let buffer = rawBuffer.bindMemory(to: UInt8.self)
+            let count = buffer.firstIndex(of: 0) ?? buffer.count
+            return String(bytes: buffer.prefix(count), encoding: .utf8) ?? ""
+        }
+    }
+    
+    public init() {
+        self._lua_Debug = .init()
     }
 }
 

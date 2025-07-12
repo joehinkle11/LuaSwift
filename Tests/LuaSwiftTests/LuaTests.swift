@@ -30,6 +30,12 @@ import Lua
     L.close()
 }
 
+@Test func simpleSuspendCoroutine() {
+    let L = LuaState.newLuaState()
+    L.openLibs()
+    
+}
+
 @Test func simpleNoCall() {
     let L = LuaState.newLuaState()
     L.openLibs()
