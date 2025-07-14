@@ -72,7 +72,7 @@ import Lua
     L.setGlobal("c_func")
     let co = L.newThread()
     #expect(L.getTop() == 1)
-    let status = co.loadBufferX(buffer: #"c_func()"#, name: "hello")
+    let status = co.loadBufferX(buffer: #"c_func();return 'done'"#, name: "hello")
     #expect(status == .LUA_OK)
     #expect(L.getTop() == 1)
     var nresults: Int32 = 0
@@ -95,12 +95,11 @@ import Lua
     #expect(L.getTop() == 1)
     #expect(co.getTop() == 0)
     result = co.resume(nargs: 0, nresults: &nresults)
-    #expect(co.getTop() == 0)
+    #expect(co.getTop() == 1)
     #expect(L.getTop() == 1)
     #expect(result == .LUA_OK)
-    #expect(nresults == 0)
-    #expect(L.getTop() == 1)
-    #expect(co.getTop() == 0)
+    #expect(nresults == 1)
+    #expect(co.toString() == "done")
     L.close()
 }
 

@@ -630,4 +630,13 @@ public struct LuaState {
     public func yieldInsideHook(nresults: Int32) -> Int32 {
         return luaYieldkInsideHook(nresults: nresults, ctx: 0, k: nil)
     }
+
+    /// Converts any Lua value at the given index to a C string in a reasonable format. The resulting string is pushed onto the stack and also returned by the function (see §4.1.3). If len is not NULL, the function also sets *len with the string length.
+    /// If the value has a metatable with a __tostring field, then luaL_tolstring calls the corresponding metamethod with the value as argument, and uses the result of the call as its result.
+    @inlinable
+    @inline(__always)
+    public func luaLToString(_ idx: Int32, len: UnsafeMutablePointer<size_t>? = nil) -> String {
+        guard let result = luaL_tolstring(state, idx, len) else { return "" }
+        return String(cString: result)
+    }
 }
