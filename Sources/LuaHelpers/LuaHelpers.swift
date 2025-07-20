@@ -35,7 +35,6 @@ extension LuaState {
                 self.pushValue(value)
                 self.setTable(-3)
             }
-            
         }
     }
     

@@ -1,7 +1,7 @@
 
 import CLua
 
-public struct LuaState {
+public struct LuaState: @unchecked Sendable {
     
     @inline(__always)
     public let state: UnsafeMutablePointer<lua_State>?
@@ -223,6 +223,13 @@ public struct LuaState {
     @inline(__always)
     public func rawGetI(_ idx: Int32, n: lua_Integer) -> LuaType {
         return LuaType(rawValue: lua_rawgeti(state, idx, n))
+    }
+    
+    /// Similar to lua_settable, but does a raw assignment (i.e., without metamethods). The value at index must be a table.
+    @inlinable
+    @inline(__always)
+    public func rawSet(_ idx: Int32) {
+        lua_rawset(state, idx)
     }
     
     @inlinable

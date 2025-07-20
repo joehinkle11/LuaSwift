@@ -58,7 +58,7 @@ public protocol SwiftStructUserdata: Sendable {
 }
 
 extension SwiftStructUserdata {
-    @inlinable
+    @inline(__always)
     public static func pt(from pt: OpaquePointer) -> UnsafeMutablePointer<any SwiftStructUserdata> {
         return UnsafeMutablePointer<any SwiftStructUserdata>(pt)
     }
@@ -66,52 +66,76 @@ extension SwiftStructUserdata {
     internal static func destory(pt: OpaquePointer) {
         UnsafeMutablePointer<Self>(pt).deinitialize(count: 1)
     }
+    @inline(__always)
     public static func __add(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__add(L) }
     public func __add(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __sub(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__sub(L) }
     public func __sub(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __mul(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__mul(L) }
     public func __mul(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __div(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__div(L) }
     public func __div(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __mod(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__mod(L) }
     public func __mod(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __pow(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__pow(L) }
     public func __pow(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __unm(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__unm(L) }
     public func __unm(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __idiv(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__idiv(L) }
     public func __idiv(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __band(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__band(L) }
     public func __band(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __bor(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__bor(L) }
     public func __bor(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __bxor(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__bxor(L) }
     public func __bxor(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __bnot(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__bnot(L) }
     public func __bnot(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __shl(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__shl(L) }
     public func __shl(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __shr(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__shr(L) }
     public func __shr(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __concat(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__concat(L) }
     public func __concat(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __len(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__len(L) }
     public func __len(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __eq(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__eq(L) }
     public func __eq(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __lt(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__lt(L) }
     public func __lt(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __le(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__le(L) }
     public func __le(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __index(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__index(L) }
     public func __index(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __newindex(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__newindex(L) }
     public func __newindex(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __call(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__call(L) }
     public func __call(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __gc(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__gc(L) }
     public func __gc(_ L: LuaState) -> Int32 { 0 }
+    @inline(__always)
     public static func __tostring(self: OpaquePointer, _ L: LuaState) -> Int32 { UnsafeMutablePointer<Self>(self).pointee.__tostring(L) }
     public func __tostring(_ L: LuaState) -> Int32 { 0 }
 }
@@ -226,7 +250,7 @@ extension LuaState {
             
             // Call operation - userdata at index -1
             self.setField(-2, key: "__call", cFunction: { L in
-                guard let wrappedInstance = L.getUserDataInstance(index: -1) else { return 0 }
+                guard let wrappedInstance = L.getUserDataInstance(index: 1) else { return 0 }
                 return wrappedInstance.tag.__call(self: wrappedInstance.value, L)
             })
             
@@ -256,8 +280,9 @@ extension LuaState {
     
     @inlinable
     public func toUserDataInstancePointer<T: SwiftStructUserdata>(index: Int32 = -1, as: T.Type = T.self) -> UnsafeMutablePointer<T>? {
-        guard let wrapperPt = self.toUserData(index) else { return nil }
-        return UnsafeMutablePointer(SwiftStructUserdataWrapperErased(wrapperPt).value)
+        guard let wrapperErased = getUserDataInstance(index: index) else { return nil }
+        guard wrapperErased.tag == T.self else { return nil }
+        return UnsafeMutablePointer(wrapperErased.value)
     }
 }
 

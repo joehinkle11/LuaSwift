@@ -1,7 +1,7 @@
 import Lua
 
 /// A value held inside a Lua VM. Call `.copyToSwift()` to decouple from the Lua VM.
-public enum LuaValue: ~Copyable {
+public enum LuaValue: ~Copyable, @unchecked Sendable {
     case luaNil
     case bool(Bool)
     case number(LuaNumber)
@@ -89,7 +89,7 @@ public enum LuaValue: ~Copyable {
     }
 }
 
-public enum LuaNumber: Equatable {
+public enum LuaNumber: Equatable, Sendable {
     case int(Int64)
     case double(Double)
     
@@ -223,11 +223,11 @@ extension LuaState {
         case .TABLE:
             return .table(LuaTable(luaState: self, idx: idx))
         case .FUNCTION:
-            fatalError()
+            return nil
         case .USERDATA:
-            fatalError()
+            return nil
         case .THREAD:
-            fatalError()
+            return nil
         }
     }
 }
