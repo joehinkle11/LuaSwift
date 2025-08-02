@@ -253,27 +253,25 @@ public struct Table: ExpressibleByDictionaryLiteral, ExpressibleByArrayLiteral {
             let swiftKey = next.key.copyToSwift()
             let swiftValue = next.value.copyToSwift()
             switch swiftKey {
-            case .luaNil:
+            case nil, .luaNil:
                 break
             case .bool(let bool):
-                self[.dictKey(.bool(bool))] = swiftValue
+                self[.dictKey(.bool(bool))] = swiftValue ?? .luaNil
             case .number(let luaNumber):
                 switch luaNumber {
                 case .int(let int):
                     if int > 0 {
-                        self[.arrayKey(int)] = swiftValue
+                        self[.arrayKey(int)] = swiftValue ?? .luaNil
                     } else {
-                        self[.dictKey(.nonIndexNumber(Double(int)))] = swiftValue
+                        self[.dictKey(.nonIndexNumber(Double(int)))] = swiftValue ?? .luaNil
                     }
                 case .double(let double):
-                    self[.dictKey(.nonIndexNumber(double))] = swiftValue
+                    self[.dictKey(.nonIndexNumber(double))] = swiftValue ?? .luaNil
                 }
             case .string(let stringKey):
-                self[.dictKey(.string(stringKey))] = swiftValue
-            case .table(_):
-                fatalError("todo")
-            case .lightUserData(_):
-                fatalError("todo")
+                self[.dictKey(.string(stringKey))] = swiftValue ?? .luaNil
+            case .table, .lightUserData:
+                break
             }
             return true
         }

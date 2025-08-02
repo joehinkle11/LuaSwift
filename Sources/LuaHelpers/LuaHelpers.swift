@@ -63,6 +63,36 @@ extension LuaState {
         }
     }
     
+    /// Pushes value which is associated with a Lua VM to the Lua stack
+    @inlinable
+    @inline(__always)
+    public func pushValue(_ value: UnsafeLuaValue) {
+        switch value {
+        case .luaNil, .luaNone:
+            self.pushNil()
+        case .bool(let bool):
+            self.pushBoolean(bool)
+        case .number(let num):
+            switch num {
+            case .int(let int):
+                self.pushInteger(int)
+            case .double(let double):
+                self.pushNumber(double)
+            }
+        case .lightUserData(let lightUserData):
+            self.pushLightUserData(lightUserData)
+        case .string(let ref), .table(let ref), .userData(let ref), .thread(let ref), .function(let ref):
+            self.pushRef(ref.ref)
+        }
+    }
+    
+    /// Pushes value which is associated with a Lua VM to the Lua stack
+    @inlinable
+    @inline(__always)
+    public func pushValue(_ value: borrowing LuaValue) {
+        self.pushValue(value.unsafeLuaValue)
+    }
+    
     @inlinable
     @inline(__always)
     public func rawGetIRegistryIndex(ref: lua_Integer) -> LuaType {
@@ -134,6 +164,26 @@ extension LuaState {
     @inline(__always)
     public func gcIsRunning() -> Bool {
         return gc(what: LUA_GCISRUNNING) == 1
+    }
+    
+    
+    @inlinable
+    @inline(__always)
+    public func toCFunction(_ idx: Int32 = -1) -> (@convention(thin) (LuaState) -> Int32)? {
+        if let luaCFunc = self.toLuaCFunction(idx) {
+            return unsafeBitCast(luaCFunc, to: (@convention(thin) (LuaState) -> Int32).self)
+        }
+        return nil
+    }
+    
+    
+    @inlinable
+    @inline(__always)
+    public func toFunction(_ idx: Int32 = -1) -> LuaFunction? {
+        if self.type(idx) == .LUA_TFUNCTION {
+            return LuaFunction(unsafeLuaFunction: UnsafeLuaRef(luaState: self, idx: idx))
+        }
+        return nil
     }
     
     /// Pushes a C function onto the stack. This function receives a pointer to a C function and pushes onto the stack a Lua value of type function that, when called, invokes the corresponding C function.

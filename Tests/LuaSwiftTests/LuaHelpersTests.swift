@@ -31,7 +31,7 @@ import LuaHelpers
     let L = LuaState.newLuaState()
     L.pushString("hello")
     let val = L.toLuaValue()
-    #expect(val?.asString == "hello")
+    #expect(val.asString()?.copyToSwift() == "hello")
     L.close()
 }
 
@@ -41,9 +41,9 @@ import LuaHelpers
     pt.pointee = 42
     L.pushLightUserData(pt)
     let val = L.toLuaValue()
-    #expect(val?.asLightUserData(type: Int.self)?.pointee == 42)
+    #expect(val.asLightUserData(type: Int.self)?.pointee == 42)
     pt.pointee = 43
-    #expect(val?.asLightUserData(type: Int.self)?.pointee == 43)
+    #expect(val.asLightUserData(type: Int.self)?.pointee == 43)
     pt.deallocate()
     L.close()
 }
@@ -53,7 +53,7 @@ import LuaHelpers
     let emptyTable: Table = [:]
     L.pushTable(emptyTable)
     let val = L.toLuaValue()
-    let copiedTbl: Table = try #require(try val?.asTable()?.copyToSwift())
+    let copiedTbl: Table = try #require(try val.asTable()?.copyToSwift())
     #expect(copiedTbl.dictionary.isEmpty)
     L.close()
 }
@@ -75,7 +75,7 @@ import LuaHelpers
     ]
     L.pushTable(origTable)
     let val = L.toLuaValue()
-    let copiedTbl: Table = try #require(try val?.asTable()?.copyToSwift())
+    let copiedTbl: Table = try #require(try val.asTable()?.copyToSwift())
     #expect(copiedTbl.dictionary.count == origTable.dictionary.count)
     #expect(copiedTbl.array.count == origTable.array.count)
     #expect(copiedTbl.dictionary[.bool(true)] == .string("bool_true"))

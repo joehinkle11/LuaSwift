@@ -101,6 +101,19 @@ public struct LuaState: @unchecked Sendable {
         }
     }
     
+    /// Creates and pushes a traceback of the stack L1. If msg is not NULL, it is appended at the beginning of the traceback. The level parameter tells at which level to start the traceback.
+    @inlinable
+    @inline(__always)
+    public func traceback(L1: LuaState, msg: String? = nil, level: Int32 = 1) {
+        luaL_traceback(state, L1.state, msg, level)
+    }
+    
+    @inlinable
+    @inline(__always)
+    public func toLuaCFunction(_ idx: Int32 = -1) -> lua_CFunction? {
+        return lua_tocfunction(state, idx)
+    }
+    
     @inlinable
     @inline(__always)
     public func toLightUserData(_ idx: Int32 = -1) -> UnsafeMutableRawPointer? {
@@ -412,7 +425,24 @@ public struct LuaState: @unchecked Sendable {
     @inlinable
     @inline(__always)
     public func insert(_ idx: Int32) {
-        lua_rotate(state, idx, 1)
+        rotate(idx, n: 1)
+    }
+    
+    /// void lua_remove (lua_State *L, int index);
+    /// Removes the element at the given valid index, shifting down the elements above this index to fill the gap. This function cannot be called with a pseudo-index, because a pseudo-index is not an actual stack position.
+    @inlinable
+    @inline(__always)
+    public func remove(_ idx: Int32) {
+        rotate(idx, n: -1)
+        pop(1)
+    }
+
+    /// void lua_rotate (lua_State *L, int idx, int n);
+    /// Rotates the stack elements between the valid index idx and the top of the stack. The elements are rotated n positions in the direction of the top, for a positive n, or -n positions in the direction of the bottom, for a negative n. The absolute value of n must not be greater than the size of the slice being rotated. This function cannot be called with a pseudo-index, because a pseudo-index is not an actual stack position.
+    @inlinable
+    @inline(__always)
+    public func rotate(_ idx: Int32, n: Int32) {
+        lua_rotate(state, idx, n)
     }
 
     /// Returns the length of the value at the given index. It is equivalent to the '#' operator in Lua and may trigger a metamethod for the "length" event.

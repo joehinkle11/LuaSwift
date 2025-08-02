@@ -279,6 +279,12 @@ extension LuaState {
     }
     
     @inlinable
+    public func toUserDataInstancePointerTag(index: Int32 = -1) -> SwiftStructUserdata.Type? {
+        guard let wrapperPt = self.toUserData(index) else { return nil }
+        return SwiftStructUserdataWrapperErased(wrapperPt).tag
+    }
+    
+    @inlinable
     public func toUserDataInstancePointer<T: SwiftStructUserdata>(index: Int32 = -1, as: T.Type = T.self) -> UnsafeMutablePointer<T>? {
         guard let wrapperErased = getUserDataInstance(index: index) else { return nil }
         guard wrapperErased.tag == T.self else { return nil }
