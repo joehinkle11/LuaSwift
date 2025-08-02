@@ -140,6 +140,39 @@ public struct LuaValue: ~Copyable {
     
     @inlinable
     @inline(__always)
+    public borrowing func type() -> LuaTypeEnum {
+        switch unsafeLuaValue {
+        case .luaNone:
+            return .NONE
+        case .luaNil:
+            return .NIL
+        case .userData:
+            return .USERDATA
+        case .bool:
+            return .BOOLEAN
+        case .number:
+            return .NUMBER
+        case .string:
+            return .STRING
+        case .lightUserData:
+            return .LIGHTUSERDATA
+        case .table:
+            return .TABLE
+        case .function:
+            return .FUNCTION
+        case .thread:
+            return .THREAD
+        }
+    }
+    
+    @inlinable
+    @inline(__always)
+    public borrowing func copy() -> LuaValue {
+        return LuaValue(unsafeLuaValue: unsafeLuaValue.copy())
+    }
+    
+    @inlinable
+    @inline(__always)
     public func copyToSwift() -> Value? {
         switch self.unsafeLuaValue {
         case .luaNone:
@@ -430,7 +463,9 @@ public struct LuaUserData: ~Copyable {
             unsafeLuaUserData.luaState.pop()
             return nil
         }
-        return unsafeLuaUserData.luaState.toUserDataInstancePointer()
+        let res: UnsafeMutablePointer<T>? = unsafeLuaUserData.luaState.toUserDataInstancePointer()
+        unsafeLuaUserData.luaState.pop()
+        return res
     }
     
     public consuming func discardWithoutUnref() {

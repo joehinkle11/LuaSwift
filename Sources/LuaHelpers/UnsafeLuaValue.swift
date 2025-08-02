@@ -137,7 +137,7 @@ public enum LuaNumber: Equatable, Sendable {
     
     @inlinable
     @inline(__always)
-    var int: Int? {
+    public var int: Int? {
         if let int64 {
             return Int(exactly: int64)!
         }
@@ -146,7 +146,7 @@ public enum LuaNumber: Equatable, Sendable {
     
     @inlinable
     @inline(__always)
-    var int64: Int64? {
+    public var int64: Int64? {
         switch self {
         case .int(let int):
             return int
@@ -157,7 +157,7 @@ public enum LuaNumber: Equatable, Sendable {
     
     @inlinable
     @inline(__always)
-    var double: Double {
+    public var double: Double {
         switch self {
         case .int(let int):
             return Double(int)
