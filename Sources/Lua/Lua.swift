@@ -676,4 +676,11 @@ public struct LuaState: @unchecked Sendable {
         guard let result = luaL_tolstring(state, idx, len) else { return "" }
         return String(cString: result)
     }
+
+    /// Returns 1 if the two values in indices index1 and index2 are primitively equal (that is, equal without calling the __eq metamethod). Otherwise returns 0. Also returns 0 if any of the indices are not valid.
+    @inlinable
+    @inline(__always)
+    public func rawequal(_ idx1: Int32 = -1, _ idx2: Int32 = -2) -> Bool {
+        return lua_rawequal(state, idx1, idx2) != 0
+    }
 }

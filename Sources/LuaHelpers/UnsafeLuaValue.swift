@@ -2,7 +2,7 @@
 import Lua
 
 /// A value held inside a Lua VM. You must call `deinit` or a memory leak will occur.
-public enum UnsafeLuaValue: @unchecked Sendable {
+public enum UnsafeLuaValue: @unchecked Sendable, Equatable {
     case luaNone
     case luaNil
     case bool(Bool)
@@ -118,6 +118,16 @@ public enum UnsafeLuaValue: @unchecked Sendable {
         }
     }
     
+    @inlinable
+    public func asRef() -> UnsafeLuaRef? {
+        switch self {
+        case .userData(let ref), .table(let ref), .string(let ref), .function(let ref), .thread(let ref):
+            return ref
+        default:
+            return nil
+        }
+    }
+    
     
     @inlinable
     @inline(__always)
@@ -127,6 +137,30 @@ public enum UnsafeLuaValue: @unchecked Sendable {
             break
         case .table(let ref), .string(let ref), .function(let ref), .userData(let ref), .thread(let ref):
             ref.unref()
+        }
+    }
+    
+    public static func == (lhs: UnsafeLuaValue, rhs: UnsafeLuaValue) -> Bool {
+        switch (lhs, rhs) {
+        case (.luaNone, .luaNone):
+            return true
+        case (.luaNil, .luaNil):
+            return true
+        case (.luaNil, .luaNone):
+            return true
+        case (.luaNil, .luaNone):
+            return true
+        case (.bool(let lhs), .bool(let rhs)):
+            return lhs == rhs
+        case (.number(let lhs), .number(let rhs)):
+            return lhs == rhs
+        case (.lightUserData(let lhs), .lightUserData(let rhs)):
+            return lhs == rhs
+        default:
+            if let lhs = lhs.asRef(), let rhs = rhs.asRef() {
+                return lhs == rhs
+            }
+            return false
         }
     }
 }
@@ -168,7 +202,7 @@ public enum LuaNumber: Equatable, Sendable {
 }
 
 /// A value held inside a Lua VM. Call `.copyToSwift()` to decouple from the Lua VM. Must call `unref` or a memory leak will happen.
-public struct UnsafeLuaRef: Sendable {
+public struct UnsafeLuaRef: Sendable, Equatable {
     
     @inline(__always)
     public let luaState: LuaState
@@ -204,6 +238,23 @@ public struct UnsafeLuaRef: Sendable {
     @inline(__always)
     public func unref() {
         luaState.unref(ref: ref)
+    }
+    
+    
+    public static func == (lhs: UnsafeLuaRef, rhs: UnsafeLuaRef) -> Bool {
+        guard lhs.luaState.state == rhs.luaState.state else {
+            return false
+        }
+        let L = lhs.luaState
+        let lhsType = L.pushRef(lhs.ref)
+        let rhsType = L.pushRef(rhs.ref)
+        guard lhsType == rhsType else {
+            L.pop(2)
+            return false
+        }
+        let areEqual = L.rawequal()
+        L.pop(2)
+        return areEqual
     }
 }
 
