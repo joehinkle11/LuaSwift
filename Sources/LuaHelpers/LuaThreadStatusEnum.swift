@@ -1,6 +1,6 @@
 import Lua
 
-public enum LuaThreadStatusEnum: Int32, CaseIterable {
+public enum LuaThreadStatusEnum: Int32, CaseIterable, Sendable {
     case OK = 0
     case YIELD = 1
     case ERRRUN = 2
