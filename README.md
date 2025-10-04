@@ -18,7 +18,8 @@ LuaSwift is a Swift package that embeds the complete Lua 5.4.8 interpreter and p
 - ✅ Type-safe API with Swift enums and structs
 - ✅ Coroutine support
 - ✅ All standard Lua libraries included
-- ✅ Cross-platform support (iOS, macOS, watchOS, tvOS, Linux, WASM)
+- ✅ Cross-platform support (iOS, macOS, watchOS, tvOS, Linux)
+- WASM does not work in this repo. See the repo https://github.com/nubetools/LuaSwift for WASM support
 
 ## Installation
 
@@ -106,7 +107,7 @@ LuaSwift supports all platforms that Swift supports:
 - tvOS
 - Linux
 - Windows
-- WASM
+- WASM (but at the repo located [here](https://github.com/nubetools/LuaSwift))
 
 ## Contributing
 
