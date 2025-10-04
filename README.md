@@ -2,6 +2,8 @@
 
 A Swift package that provides integration with Lua 5.4.8.
 
+> ☑️ NOTICE: While this repo works, I recommend using the fork found https://github.com/nubetools/LuaSwift
+
 ## Overview
 
 LuaSwift is a Swift package that embeds the complete Lua 5.4.8 interpreter and provides multiple levels of API access:
